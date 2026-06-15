@@ -1,0 +1,38 @@
+[
+  {
+    "id": 1,
+    "name": "System Admin",
+    "email": "admin@productsphere.com",
+    "password": "adminpassword",
+    "role": "admin",
+    "phone": "03001234567",
+    "gender": "male",
+    "status": "approved",
+    "license_no": null,
+    "business_address": null
+  },
+  {
+    "id": 2,
+    "name": "Wholesaler User",
+    "email": "wholesaler@productsphere.com",
+    "password": "wholesalerpassword",
+    "role": "wholesaler",
+    "phone": "03007654321",
+    "gender": "male",
+    "status": "approved",
+    "license_no": "TX-998827-B",
+    "business_address": "Karkhana Bazar, Faisalabad, Punjab"
+  },
+  {
+    "id": 3,
+    "name": "Buyer User",
+    "email": "buyer@productsphere.com",
+    "password": "buyerpassword",
+    "role": "buyer",
+    "phone": "03211234567",
+    "gender": "female",
+    "status": "approved",
+    "license_no": null,
+    "business_address": null
+  }
+]
