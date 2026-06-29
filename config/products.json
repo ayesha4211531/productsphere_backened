@@ -2,7 +2,7 @@
   {
     "id": 1,
     "name": "Bulk Summer T-Shirts (Lot of 100)",
-    "description": "100% organic cotton summer t-shirts in bulk. Assorted sizes and vibrant colors.",
+    "description": "100% organic cotton summer t-shirts in bulk. Assorted sizes and vibrant colors...",
     "price": 15000,
     "original_price": 25000,
     "quantity": 100,
@@ -24,13 +24,25 @@
     "status": "active"
   },
   {
-    "id": 3,
-    "name": "Natural Rose Perfume Pack (30 Bottles)",
-    "description": "Organic sweet rose scent perfume bottles. Premium packaging for gift shops.",
-    "price": 12000,
-    "original_price": 18000,
-    "quantity": 30,
-    "category": "Perfumes",
+    "id": 5,
+    "name": "sport shose",
+    "description": "33",
+    "price": 2000,
+    "original_price": 2500,
+    "quantity": 100,
+    "category": "Shoes",
+    "wholesaler_id": 2,
+    "wholesaler_name": "Wholesaler User",
+    "status": "active"
+  },
+  {
+    "id": 7,
+    "name": "shoes",
+    "description": "fvnvnlkv",
+    "price": 1000,
+    "original_price": 800,
+    "quantity": 50,
+    "category": "Shoes",
     "wholesaler_id": 2,
     "wholesaler_name": "Wholesaler User",
     "status": "active"
