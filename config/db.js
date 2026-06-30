@@ -2,8 +2,11 @@ const fs = require('fs');
 const path = require('path');
 
 const JSON_DB_PATH = path.join(__dirname, 'users.json');
+<<<<<<< HEAD
 const PRODUCTS_DB_PATH = path.join(__dirname, 'products.json');
 const CATEGORIES_DB_PATH = path.join(__dirname, 'categories.json');
+=======
+>>>>>>> 9a72b4dffa84106cb2dc26cbb7a226674300486e
 
 // Pre-seed mock user data if file doesn't exist
 if (!fs.existsSync(JSON_DB_PATH)) {
@@ -48,6 +51,7 @@ if (!fs.existsSync(JSON_DB_PATH)) {
   fs.writeFileSync(JSON_DB_PATH, JSON.stringify(seedUsers, null, 2));
 }
 
+<<<<<<< HEAD
 // Mock database pool that intercepts simple SELECT, INSERT, UPDATE, and DELETE SQL queries
 const db = {
   query: async (sql, params) => {
@@ -227,6 +231,65 @@ const db = {
           fs.writeFileSync(dbPath, JSON.stringify(filtered, null, 2));
           return [{ affectedRows: 1 }];
         }
+=======
+// Mock database pool that intercepts simple SELECT and INSERT SQL queries
+const db = {
+  query: async (sql, params) => {
+    try {
+      const data = fs.readFileSync(JSON_DB_PATH, 'utf8');
+      const users = JSON.parse(data);
+
+      const queryNormalized = sql.trim().toLowerCase();
+
+      if (queryNormalized.startsWith('select')) {
+        // Check if filtering by role and status (e.g. for pending approval list)
+        if (queryNormalized.includes('role =') && queryNormalized.includes('status =')) {
+          const roleParam = params[0].toLowerCase();
+          const statusParam = params[1].toLowerCase();
+          const matched = users.filter(u => 
+            u.role.toLowerCase() === roleParam && 
+            (u.status || 'approved').toLowerCase() === statusParam
+          );
+          return [matched];
+        }
+
+        // Example: SELECT id, name, email, password, role, phone, gender, status, license_no, business_address FROM users WHERE email = ?
+        const emailParam = params[0].toLowerCase();
+        const matchedUser = users.find(u => u.email.toLowerCase() === emailParam);
+        return [matchedUser ? [matchedUser] : []];
+      } 
+      
+      if (queryNormalized.startsWith('insert')) {
+        // Example: INSERT INTO users (name, phone, gender, email, password, role, status, license_no, business_address) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        const [name, phone, gender, email, password, role, status, license_no, business_address] = params;
+        const newUser = {
+          id: users.length > 0 ? Math.max(...users.map(u => u.id)) + 1 : 1,
+          name,
+          phone: phone || null,
+          gender: gender || 'male',
+          email,
+          password,
+          role: role || 'buyer',
+          status: status || (role === 'wholesaler' ? 'pending' : 'approved'),
+          license_no: license_no || null,
+          business_address: business_address || null
+        };
+        users.push(newUser);
+        fs.writeFileSync(JSON_DB_PATH, JSON.stringify(users, null, 2));
+        return [{ insertId: newUser.id }];
+      }
+
+      if (queryNormalized.startsWith('update')) {
+        // Example: UPDATE users SET status = ? WHERE id = ?
+        const [status, id] = params;
+        const userIndex = users.findIndex(u => u.id === parseInt(id));
+        if (userIndex !== -1) {
+          users[userIndex].status = status;
+          fs.writeFileSync(JSON_DB_PATH, JSON.stringify(users, null, 2));
+          return [{ affectedRows: 1 }];
+        }
+        return [{ affectedRows: 0 }];
+>>>>>>> 9a72b4dffa84106cb2dc26cbb7a226674300486e
       }
 
       return [[]];

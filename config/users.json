@@ -34,6 +34,7 @@
     "status": "approved",
     "license_no": null,
     "business_address": null
+<<<<<<< HEAD
   },
   {
     "id": 4,
@@ -58,5 +59,7 @@
     "status": "approved",
     "license_no": "12345",
     "business_address": "12345"
+=======
+>>>>>>> 9a72b4dffa84106cb2dc26cbb7a226674300486e
   }
 ]
