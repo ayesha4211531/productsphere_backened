@@ -134,9 +134,23 @@ const deleteProduct = async (req, res) => {
   }
 };
 
+const getAllProducts = async (req, res) => {
+  try {
+    const products = await ProductModel.getAllProducts();
+    return res.status(200).json({
+      success: true,
+      data: products
+    });
+  } catch (err) {
+    console.error("getAllProducts error:", err);
+    return res.status(500).json({ success: false, message: "Server error retrieving products" });
+  }
+};
+
 module.exports = {
   getWholesalerProducts,
   createProduct,
   updateProduct,
-  deleteProduct
+  deleteProduct,
+  getAllProducts
 };

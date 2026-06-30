@@ -5,9 +5,11 @@ const {
   getWholesalerProducts,
   createProduct,
   updateProduct,
-  deleteProduct
+  deleteProduct,
+  getAllProducts
 } = require("../controllers/productController");
 
+router.get("/", authMiddleware, getAllProducts);
 router.get("/wholesaler/:wholesalerId", authMiddleware, getWholesalerProducts);
 router.post("/", authMiddleware, createProduct);
 router.put("/:id", authMiddleware, updateProduct);
