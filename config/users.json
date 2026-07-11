@@ -34,32 +34,5 @@
     "status": "approved",
     "license_no": null,
     "business_address": null
-<<<<<<< HEAD
-  },
-  {
-    "id": 4,
-    "name": "Test",
-    "phone": "1234567890",
-    "gender": "male",
-    "email": "abc@abc.com",
-    "password": "$2b$10$BH9ENMIYSI7BrBOVmH4s8ur24Oj0DMWoiqQaCoiNTgwh18OjUhQO2",
-    "role": "wholesaler",
-    "status": "approved",
-    "license_no": "12345",
-    "business_address": "12345"
-  },
-  {
-    "id": 5,
-    "name": "Test",
-    "phone": "1234567890",
-    "gender": "male",
-    "email": "abc@xyz.com",
-    "password": "$2b$10$zreyitK8J0nFX8d..etNBuOx40/hHrrsgOYQD7DGa/YVrImpAvgTq",
-    "role": "wholesaler",
-    "status": "approved",
-    "license_no": "12345",
-    "business_address": "12345"
-=======
->>>>>>> 9a72b4dffa84106cb2dc26cbb7a226674300486e
   }
 ]

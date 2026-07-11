@@ -12,6 +12,15 @@ app.use("/", require("./routes/authRoutes"));
 // Mount admin routes
 app.use("/admin", require("./routes/adminRoutes"));
 
+// Mount category routes
+app.use("/categories", require("./routes/categoryRoutes"));
+
+// Mount product routes
+app.use("/products", require("./routes/productRoutes"));
+
+// Mount order routes
+app.use("/orders", require("./routes/orderRoutes"));
+
 app.listen(port, () => {
   console.log(`🚀 Product Sphere B2B Server running on port ${port}`);
 });
