@@ -22,7 +22,7 @@ const getWholesalerProducts = async (req, res) => {
 };
 
 const createProduct = async (req, res) => {
-  const { name, description, price, original_price, quantity, category, wholesaler_id, wholesaler_name } = req.body;
+  const { name, description, price, original_price, quantity, category, wholesaler_id, wholesaler_name, product_image } = req.body;
 
   if (!name || !price || !category) {
     return res.status(400).json({ success: false, message: "Name, price, and category are required" });
@@ -58,7 +58,8 @@ const createProduct = async (req, res) => {
       category,
       wholesaler_id: finalWholesalerId,
       wholesaler_name: finalWholesalerName,
-      status: 'active'
+      status: 'active',
+      product_image: product_image || null
     });
 
     console.log(`📦 Product created by ${req.user.role === 'admin' ? 'Admin' : 'Wholesaler'}: "${name}" (#${productId})`);
@@ -75,15 +76,15 @@ const createProduct = async (req, res) => {
 
 const updateProduct = async (req, res) => {
   const { id } = req.params;
-  const { name, description, price, original_price, quantity, category } = req.body;
+  const { name, description, price, original_price, quantity, category, product_image } = req.body;
 
   if (!name || !price || !category) {
     return res.status(400).json({ success: false, message: "Name, price, and category are required" });
   }
 
   try {
-    if (req.user.role !== "wholesaler") {
-      return res.status(403).json({ success: false, message: "Unauthorized. Wholesaler role required." });
+    if (req.user.role !== "wholesaler" && req.user.role !== "admin") {
+      return res.status(403).json({ success: false, message: "Unauthorized. Wholesaler or Admin role required." });
     }
 
     const updated = await ProductModel.updateProduct(id, {
@@ -92,7 +93,8 @@ const updateProduct = async (req, res) => {
       price,
       original_price: original_price || price,
       quantity: quantity || 1,
-      category
+      category,
+      product_image: product_image !== undefined ? product_image : null
     });
 
     if (!updated) {
@@ -147,10 +149,24 @@ const getAllProducts = async (req, res) => {
   }
 };
 
+const getApprovedWholesalersList = async (req, res) => {
+  try {
+    const wholesalers = await UserModel.findApprovedWholesalers();
+    return res.status(200).json({
+      success: true,
+      data: wholesalers
+    });
+  } catch (err) {
+    console.error("getApprovedWholesalersList error:", err);
+    return res.status(500).json({ success: false, message: "Server error retrieving wholesalers." });
+  }
+};
+
 module.exports = {
   getWholesalerProducts,
   createProduct,
   updateProduct,
   deleteProduct,
-  getAllProducts
+  getAllProducts,
+  getApprovedWholesalersList
 };
