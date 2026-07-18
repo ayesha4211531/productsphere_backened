@@ -1,216 +1,115 @@
-const UserModel = require("../models/userModel");
-const ProductModel = require("../models/productModel");
-const OrderModel = require("../models/orderModel");
 const db = require("../config/db");
 
-const getPendingWholesalers = async (req, res) => {
-  try {
-    // Only allow admin role to access this controller
-    if (req.user.role !== "admin") {
-      return res.status(403).json({ success: false, message: "Unauthorized. Admin privileges required." });
-    }
-
-    const wholesalers = await UserModel.findPendingWholesalers();
-    return res.status(200).json({
-      success: true,
-      data: wholesalers
-    });
-  } catch (err) {
-    console.error("getPendingWholesalers error:", err);
-    return res.status(500).json({ success: false, message: "Server error retrieving pending businesses" });
-  }
+// Find a user by email in the database (returns all fields including document images)
+const findByEmail = async (email) => {
+  const [rows] = await db.query(
+    `SELECT id, name, email, password, role, phone, gender, status, license_no, business_address, shop_picture, cnic_front, cnic_back FROM users WHERE email = ?`,
+    [email]
+  );
+  return rows[0] || null;
 };
 
-const updateBusinessStatus = async (req, res) => {
-  const { userId, status } = req.body;
-
-  if (!userId || !status) {
-    return res.status(400).json({ success: false, message: "userId and status are required" });
-  }
-
-  // Validate status values
-  if (!["approved", "rejected", "pending"].includes(status)) {
-    return res.status(400).json({ success: false, message: "Invalid status value. Must be 'approved', 'rejected', or 'pending'." });
-  }
-
-  try {
-    // Only allow admin role to access this controller
-    if (req.user.role !== "admin") {
-      return res.status(403).json({ success: false, message: "Unauthorized. Admin privileges required." });
-    }
-
-    const updated = await UserModel.updateUserStatus(userId, status);
-    if (!updated) {
-      return res.status(404).json({ success: false, message: "User not found or status update failed" });
-    }
-
-    console.log(`💼 Business status updated: User #${userId} is now ${status}`);
-    return res.status(200).json({
-      success: true,
-      message: `Business status successfully updated to ${status}.`
-    });
-  } catch (err) {
-    console.error("updateBusinessStatus error:", err);
-    return res.status(500).json({ success: false, message: "Server error updating status" });
-  }
+// Create a new user record in the database
+const createUser = async ({ name, phone, gender, email, password, role, status, license_no, business_address, shop_picture, cnic_front, cnic_back }) => {
+  const finalStatus = status || (role === 'wholesaler' ? 'pending' : 'approved');
+  const [result] = await db.query(
+    `INSERT INTO users (name, phone, gender, email, password, role, status, license_no, business_address, shop_picture, cnic_front, cnic_back) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    [
+      name,
+      phone || null,
+      gender || "male",
+      email,
+      password,
+      role || "buyer",
+      finalStatus,
+      license_no || null,
+      business_address || null,
+      shop_picture || null,
+      cnic_front || null,
+      cnic_back || null
+    ]
+  );
+  return result.insertId;
 };
 
-const getAllProducts = async (req, res) => {
-  try {
-    // Only allow admin role to access this controller
-    if (req.user.role !== "admin") {
-      return res.status(403).json({ success: false, message: "Unauthorized. Admin privileges required." });
-    }
-
-    const products = await ProductModel.getAllProducts();
-    return res.status(200).json({
-      success: true,
-      data: products
-    });
-  } catch (err) {
-    console.error("getAllProducts error:", err);
-    return res.status(500).json({ success: false, message: "Server error retrieving products" });
-  }
+// Find wholesalers with pending verification (includes document images for admin review)
+const findPendingWholesalers = async () => {
+  const [rows] = await db.query(
+    `SELECT id, name, email, role, phone, gender, status, license_no, business_address, shop_picture, cnic_front, cnic_back FROM users WHERE role = ? AND status = ?`,
+    ['wholesaler', 'pending']
+  );
+  return rows;
 };
 
-const deleteProduct = async (req, res) => {
-  const { id } = req.params;
-
-  try {
-    // Only allow admin role to access this controller
-    if (req.user.role !== "admin") {
-      return res.status(403).json({ success: false, message: "Unauthorized. Admin privileges required." });
-    }
-
-    const deleted = await ProductModel.deleteProduct(id);
-    if (!deleted) {
-      return res.status(404).json({ success: false, message: "Product not found or deletion failed" });
-    }
-
-    console.log(`📦 Product deleted by Admin: Product #${id}`);
-    return res.status(200).json({
-      success: true,
-      message: "Product deleted successfully from the catalog."
-    });
-  } catch (err) {
-    console.error("deleteProduct error:", err);
-    return res.status(500).json({ success: false, message: "Server error deleting product" });
-  }
+// Update user verification status
+const updateUserStatus = async (id, status) => {
+  const [result] = await db.query(
+    `UPDATE users SET status = ? WHERE id = ?`,
+    [status, id]
+  );
+  return result.affectedRows > 0;
 };
 
-const updateProductStatus = async (req, res) => {
-  const { productId, status } = req.body;
-
-  if (!productId || !status) {
-    return res.status(400).json({ success: false, message: "productId and status are required" });
-  }
-
-  try {
-    // Only allow admin role to access this controller
-    if (req.user.role !== "admin") {
-      return res.status(403).json({ success: false, message: "Unauthorized. Admin privileges required." });
-    }
-
-    const updated = await ProductModel.updateProductStatus(productId, status);
-    if (!updated) {
-      return res.status(404).json({ success: false, message: "Product not found or status update failed" });
-    }
-
-    console.log(`📦 Product status updated by Admin: Product #${productId} status is now ${status}`);
-    return res.status(200).json({
-      success: true,
-      message: `Product status updated to ${status}.`
-    });
-  } catch (err) {
-    console.error("updateProductStatus error:", err);
-    return res.status(500).json({ success: false, message: "Server error updating product status" });
-  }
+// Find wholesalers that are already verified and approved
+const findApprovedWholesalers = async () => {
+  const [rows] = await db.query(
+    `SELECT id, name, email FROM users WHERE role = ? AND status = ?`,
+    ['wholesaler', 'approved']
+  );
+  return rows;
 };
 
-const getApprovedWholesalers = async (req, res) => {
-  try {
-    if (req.user.role !== "admin") {
-      return res.status(403).json({ success: false, message: "Unauthorized. Admin privileges required." });
-    }
-
-    const wholesalers = await UserModel.findApprovedWholesalers();
-    return res.status(200).json({
-      success: true,
-      data: wholesalers
-    });
-  } catch (err) {
-    console.error("getApprovedWholesalers error:", err);
-    return res.status(500).json({ success: false, message: "Server error retrieving approved wholesalers" });
-  }
+// Find all buyers registered on the platform
+const findBuyers = async () => {
+  const [rows] = await db.query(
+    `SELECT id, name, email, role, phone, gender, status, created_at FROM users WHERE role = ?`,
+    ['buyer']
+  );
+  return rows;
 };
 
-const getBuyers = async (req, res) => {
-  try {
-    if (req.user.role !== "admin") {
-      return res.status(403).json({ success: false, message: "Unauthorized. Admin privileges required." });
-    }
-    const buyers = await UserModel.findBuyers();
-    return res.status(200).json({ success: true, data: buyers });
-  } catch (err) {
-    console.error("getBuyers error:", err);
-    return res.status(500).json({ success: false, message: "Server error retrieving buyers" });
-  }
+// Find a user by ID (for profile updates and password verification)
+const findById = async (id) => {
+  const [rows] = await db.query(
+    `SELECT id, name, email, password, role, phone, gender, status, license_no, business_address FROM users WHERE id = ?`,
+    [id]
+  );
+  return rows[0] || null;
 };
 
-const getAdminOrders = async (req, res) => {
-  try {
-    if (req.user.role !== "admin") {
-      return res.status(403).json({ success: false, message: "Unauthorized. Admin privileges required." });
-    }
-    const orders = await OrderModel.getAllOrders();
+// Update a user's profile fields (name, phone, gender)
+const updateUserProfile = async (id, { name, phone, gender }) => {
+  const fields = [];
+  const values = [];
+  if (name !== undefined && name !== null) { fields.push('name = ?'); values.push(name); }
+  if (phone !== undefined && phone !== null) { fields.push('phone = ?'); values.push(phone); }
+  if (gender !== undefined && gender !== null) { fields.push('gender = ?'); values.push(gender); }
+  if (fields.length === 0) return false;
+  values.push(id);
+  const [result] = await db.query(
+    `UPDATE users SET ${fields.join(', ')} WHERE id = ?`,
+    values
+  );
+  return result.affectedRows > 0;
+};
 
-    // Fetch products to map wholesaler details
-    const [products] = await db.query("SELECT id, wholesaler_id, wholesaler_name FROM products");
-    const productMap = {};
-    products.forEach(p => {
-      productMap[p.id] = {
-        wholesaler_id: p.wholesaler_id,
-        wholesaler_name: p.wholesaler_name
-      };
-    });
-
-    const resolved = orders.map(order => {
-      let itemsList = [];
-      try {
-        itemsList = typeof order.items === 'string' ? JSON.parse(order.items) : order.items;
-      } catch (e) {
-        itemsList = [];
-      }
-
-      const updatedItems = itemsList.map(item => {
-        const prodInfo = productMap[item.product_id] || {};
-        return {
-          ...item,
-          wholesaler_id: item.wholesaler_id || prodInfo.wholesaler_id || null,
-          wholesaler_name: item.wholesaler_name || prodInfo.wholesaler_name || 'Wholesaler'
-        };
-      });
-
-      return {
-        ...order,
-        items: updatedItems
-      };
-    });
-
-    return res.status(200).json({ success: true, data: resolved });
-  } catch (err) {
-    console.error("getAdminOrders error:", err);
-    return res.status(500).json({ success: false, message: "Server error retrieving platform orders" });
-  }
+// Update a user's hashed password
+const updateUserPassword = async (id, hashedPassword) => {
+  const [result] = await db.query(
+    `UPDATE users SET password = ? WHERE id = ?`,
+    [hashedPassword, id]
+  );
+  return result.affectedRows > 0;
 };
 
 module.exports = {
-  getPendingWholesalers,
-  updateBusinessStatus,
-  getAllProducts,
-  deleteProduct,
-  updateProductStatus,
-  getApprovedWholesalers,
-  getBuyers,
-  getAdminOrders
+  findByEmail,
+  createUser,
+  findPendingWholesalers,
+  updateUserStatus,
+  findApprovedWholesalers,
+  findBuyers,
+  findById,
+  updateUserProfile,
+  updateUserPassword
 };
