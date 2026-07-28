@@ -3,6 +3,7 @@ const router = express.Router();
 const authMiddleware = require("../middleware/auth");
 const {
   getWholesalerProducts,
+  getApprovedWholesalersList,
   createProduct,
   updateProduct,
   deleteProduct,
@@ -11,6 +12,7 @@ const {
 
 router.get("/", authMiddleware, getAllProducts);
 router.get("/wholesaler/:wholesalerId", authMiddleware, getWholesalerProducts);
+router.get("/wholesalers", authMiddleware, getApprovedWholesalersList);
 router.post("/", authMiddleware, createProduct);
 router.put("/:id", authMiddleware, updateProduct);
 router.delete("/:id", authMiddleware, deleteProduct);
