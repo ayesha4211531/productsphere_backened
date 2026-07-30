@@ -2,12 +2,13 @@ const express = require("express");
 const router = express.Router();
 const authMiddleware = require("../middleware/auth");
 const {
+  getAllProducts,
   getWholesalerProducts,
   getApprovedWholesalersList,
   createProduct,
   updateProduct,
   deleteProduct,
-  getAllProducts
+ 
 } = require("../controllers/productController");
 
 router.get("/", authMiddleware, getAllProducts);
