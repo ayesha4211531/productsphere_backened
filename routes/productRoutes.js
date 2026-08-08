@@ -8,7 +8,6 @@ const {
   createProduct,
   updateProduct,
   deleteProduct,
- 
 } = require("../controllers/productController");
 
 router.get("/", authMiddleware, getAllProducts);
