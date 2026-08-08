@@ -70,7 +70,7 @@ const login = async (req, res) => {
 
 // User Signup Controller
 const signup = async (req, res) => {
-  const { name, phone, gender, email, password, role, license_no, business_address } = req.body;
+  const { name, phone, gender, email, password, role, license_no, business_address, shop_picture, cnic_front, cnic_back } = req.body;
 
   if (!name || !email || !password || !role) {
     return res.status(400).json({ success: false, message: "Name, email, password, and role are required" });
@@ -95,13 +95,16 @@ const signup = async (req, res) => {
       role: role.toLowerCase(),
       status: isWholesaler ? 'pending' : 'approved',
       license_no: isWholesaler ? license_no : null,
-      business_address: isWholesaler ? business_address : null
+      business_address: isWholesaler ? business_address : null,
+      shop_picture: isWholesaler ? (shop_picture || null) : null,
+      cnic_front: isWholesaler ? (cnic_front || null) : null,
+      cnic_back: isWholesaler ? (cnic_back || null) : null,
     });
 
     console.log(`👤 Account created: ${name} (${role})`);
     return res.status(201).json({
       success: true,
-      message: isWholesaler 
+      message: isWholesaler
         ? "Business registered successfully and is pending admin approval."
         : "Account created successfully.",
       user_id: userId

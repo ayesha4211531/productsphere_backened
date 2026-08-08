@@ -6,10 +6,12 @@ const {
   createProduct,
   updateProduct,
   deleteProduct,
-  getAllProducts
+  getAllProducts,
+  getApprovedWholesalersList
 } = require("../controllers/productController");
 
 router.get("/", authMiddleware, getAllProducts);
+router.get("/wholesalers", authMiddleware, getApprovedWholesalersList);
 router.get("/wholesaler/:wholesalerId", authMiddleware, getWholesalerProducts);
 router.post("/", authMiddleware, createProduct);
 router.put("/:id", authMiddleware, updateProduct);
