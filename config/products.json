@@ -216,5 +216,18 @@
     "wholesaler_name": "Test",
     "status": "active",
     "product_image": null
+  },
+  {
+    "id": 20,
+    "name": "show",
+    "description": null,
+    "price": 5657,
+    "original_price": 756,
+    "quantity": 56,
+    "category": "Perfumes",
+    "wholesaler_id": 2,
+    "wholesaler_name": "Wholesaler User",
+    "status": "active",
+    "product_image": null
   }
 ]
