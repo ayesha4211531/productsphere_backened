@@ -34,7 +34,8 @@
     "category": "Shoes",
     "wholesaler_id": 4,
     "wholesaler_name": "Test",
-    "status": "active"
+    "status": "active",
+    "product_image": null
   },
   {
     "id": 5,

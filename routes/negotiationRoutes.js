@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const authMiddleware = require("../middleware/auth");
-const { createNegotiation, getBuyerNegotiations, getWholesalerNegotiations, updateStatus, getAllNegotiations } = require("../controllers/negotiationController");
+const { createNegotiation, getBuyerNegotiations, getWholesalerNegotiations, updateStatus, getAllNegotiations } = require("../controllers/negotiationController.js");
 
 router.post("/", authMiddleware, createNegotiation);
 router.get("/", authMiddleware, getAllNegotiations);

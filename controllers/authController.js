@@ -29,20 +29,33 @@ const login = async (req, res) => {
     }
 
     // Check account status for wholesalers
-    if (user.role === 'wholesaler') {
-      const userStatus = user.status || 'approved';
-      if (userStatus === 'pending') {
-        return res.status(200).json({
-          success: false,
-          message: "Your business account is pending approval by the Admin."
-        });
-      } else if (userStatus === 'rejected') {
-        return res.status(200).json({
-          success: false,
-          message: "Your business registration was rejected by the Admin."
-        });
-      }
-    }
+    // Check account status
+const userStatus = user.status || 'approved';
+
+// Suspended users cannot login
+if (userStatus === 'suspended') {
+  return res.status(403).json({
+    success: false,
+    message: "Your account has been suspended by the Admin."
+  });
+}
+
+// Wholesaler-specific status checks
+if (user.role === 'wholesaler') {
+  if (userStatus === 'pending') {
+    return res.status(200).json({
+      success: false,
+      message: "Your business account is pending approval by the Admin."
+    });
+  }
+
+  if (userStatus === 'rejected') {
+    return res.status(200).json({
+      success: false,
+      message: "Your business registration was rejected by the Admin."
+    });
+  }
+}
 
     // Generate JWT token
     const token = jwt.sign(

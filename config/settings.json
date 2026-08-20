@@ -1,0 +1,30 @@
+[
+  {
+    "key": "platform_name",
+    "value": "Product Sphere"
+  },
+  {
+    "key": "contact_email",
+    "value": "support@productsphere.com"
+  },
+  {
+    "key": "commission_percent",
+    "value": "5"
+  },
+  {
+    "key": "max_negotiation_rounds",
+    "value": "3"
+  },
+  {
+    "key": "maintenance_mode",
+    "value": "false"
+  },
+  {
+    "key": "allow_buyer_registration",
+    "value": "true"
+  },
+  {
+    "key": "allow_wholesaler_registration",
+    "value": "true"
+  }
+]

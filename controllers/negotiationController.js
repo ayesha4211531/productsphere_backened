@@ -1,5 +1,5 @@
-const NegotiationModel = require("../models/negotiationModel");
-const UserModel = require("../models/userModel");
+const NegotiationModel = require("../models/negotiationModel.js");
+const UserModel = require("../models/userModel.js");
 
 const createNegotiation = async (req, res) => {
   const { product_id, product_name, price, quantity, bid_price, message, wholesaler_id } = req.body;
