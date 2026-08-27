@@ -77,14 +77,17 @@ const getWholesalerNegotiations = async (req, res) => {
 
 const updateStatus = async (req, res) => {
   const { id } = req.params;
-  const { status } = req.body;
-
+ const { status, rejection_message } = req.body;
   if (!status) {
     return res.status(400).json({ success: false, message: "Status parameter is required." });
   }
 
   try {
-    const updated = await NegotiationModel.updateNegotiationStatus(id, status);
+   const updated = await NegotiationModel.updateNegotiationStatus(
+  id,
+  status,
+  rejection_message || null
+);
     if (updated) {
       return res.status(200).json({
         success: true,
