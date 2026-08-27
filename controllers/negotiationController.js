@@ -74,31 +74,49 @@ const getWholesalerNegotiations = async (req, res) => {
     return res.status(500).json({ success: false, message: "Server error retrieving bids." });
   }
 };
-
 const updateStatus = async (req, res) => {
   const { id } = req.params;
-  const { status } = req.body;
+  const { status, message } = req.body;
 
   if (!status) {
-    return res.status(400).json({ success: false, message: "Status parameter is required." });
+    return res.status(400).json({
+      success: false,
+      message: "Status parameter is required."
+    });
   }
 
   try {
-    const updated = await NegotiationModel.updateNegotiationStatus(id, status);
+    console.log("🔍 Updating Bid ID:", id);
+    console.log("🔍 New Status:", status);
+    console.log("🔍 Wholesaler Message:", message);
+
+    const updated = await NegotiationModel.updateNegotiationStatus(
+      id,
+      status,
+      message
+    );
+
     if (updated) {
       return res.status(200).json({
         success: true,
         message: `Bid status updated to ${status}.`
       });
-    } else {
-      return res.status(404).json({ success: false, message: "Bid not found." });
     }
+
+    return res.status(404).json({
+      success: false,
+      message: "Bid not found."
+    });
+
   } catch (err) {
     console.error("updateStatus error:", err);
-    return res.status(500).json({ success: false, message: "Server error updating status." });
+
+    return res.status(500).json({
+      success: false,
+      message: "Server error updating status."
+    });
   }
 };
-
 const getAllNegotiations = async (req, res) => {
   try {
     const user = await UserModel.findByEmail(req.user.email);
