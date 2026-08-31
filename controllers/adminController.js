@@ -29,8 +29,8 @@ const updateBusinessStatus = async (req, res) => {
   }
 
   // Validate status values
-  if (!["approved", "rejected", "pending"].includes(status)) {
-    return res.status(400).json({ success: false, message: "Invalid status value. Must be 'approved', 'rejected', or 'pending'." });
+  if (!["approved", "rejected", "pending", "suspended"].includes(status)) {
+    return res.status(400).json({ success: false, message: "Invalid status value. Must be 'approved', 'rejected', 'pending', or 'suspended'." });
   }
 
   try {
