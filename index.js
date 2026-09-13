@@ -5,6 +5,8 @@ const port = 3004;
 
 app.use(cors());
 app.use(express.json());
+app.use(express.json({ limit: "50mb" }));
+app.use(express.urlencoded({ limit: "50mb", extended: true }));
 
 // Mount authentication routes matching the reference architecture
 app.use("/", require("./routes/authRoutes"));
@@ -28,5 +30,5 @@ app.use("/negotiations", require("./routes/negotiationRoutes"));
 app.use("/settings", require("./routes/settingsRoutes"));
 
 app.listen(port, () => {
-  console.log(`🚀 Product Sphere B2B Server running on port ${port}`);
+console.log(`🚀 Product Sphere B2B Server running on port ${port}`);
 });

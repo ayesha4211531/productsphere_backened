@@ -3,6 +3,7 @@ const router = express.Router();
 const authMiddleware = require("../middleware/auth");
 const { createOrder, getBuyerOrders,getWholesalerOrders,updateOrderStatus } = require("../controllers/orderController");
 
+router.post("/", authMiddleware, createOrder);
 router.post("/checkout", authMiddleware, createOrder);
 router.get("/my-orders", authMiddleware, getBuyerOrders);
 router.get("/wholesaler", authMiddleware, getWholesalerOrders);
