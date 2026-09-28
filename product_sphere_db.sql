@@ -58,6 +58,26 @@ CREATE TABLE `negotiations` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `notifications`
+--
+
+CREATE TABLE `notifications` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `user_id` int NOT NULL,
+  `title` varchar(255) NOT NULL,
+  `message` text NOT NULL,
+  `type` varchar(50) DEFAULT 'system' COMMENT 'order, bid, verification, system',
+  `is_read` tinyint(1) DEFAULT 0,
+  `sender_name` varchar(255) DEFAULT 'System',
+  `sender_role` varchar(50) DEFAULT 'system',
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `user_id` (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `orders`
 --
 

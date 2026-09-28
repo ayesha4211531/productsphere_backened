@@ -1,6 +1,7 @@
 const UserModel = require("../models/userModel");
 const ProductModel = require("../models/productModel");
 const OrderModel = require("../models/orderModel");
+const NotificationModel = require("../models/notificationModel");
 const db = require("../config/db");
 
 const getPendingWholesalers = async (req, res) => {
@@ -29,13 +30,13 @@ const updateBusinessStatus = async (req, res) => {
   }
 
   // Validate status values
- if (!["approved", "rejected", "pending", "suspended"].includes(status)) {
-  return res.status(400).json({
-    success: false,
-    message:
-      "Invalid status value. Must be 'approved', 'rejected', 'pending', or 'suspended'."
-  });
-}
+  if (!["approved", "rejected", "pending", "suspended", "revoked"].includes(status.toLowerCase())) {
+    return res.status(400).json({
+      success: false,
+      message:
+        "Invalid status value. Must be 'approved', 'rejected', 'pending', 'suspended', or 'revoked'."
+    });
+  }
 
   try {
     // Only allow admin role to access this controller
@@ -47,6 +48,18 @@ const updateBusinessStatus = async (req, res) => {
     if (!updated) {
       return res.status(404).json({ success: false, message: "User not found or status update failed" });
     }
+
+    // Send notification to user
+    try {
+      NotificationModel.createNotification({
+        userId,
+        title: `Account Status: ${status.toUpperCase()}`,
+        message: `Your account status has been updated to "${status}" by the platform administration.`,
+        type: "verification",
+        senderName: "System Admin",
+        senderRole: "admin"
+      });
+    } catch (_) {}
 
     console.log(`💼 Business status updated: User #${userId} is now ${status}`);
     return res.status(200).json({

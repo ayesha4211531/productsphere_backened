@@ -1,5 +1,6 @@
 const OrderModel = require("../models/orderModel");
 const UserModel = require("../models/userModel");
+const NotificationModel = require("../models/notificationModel");
 const db = require("../config/db");
 
 const createOrder = async (req, res) => {
@@ -29,6 +30,39 @@ const createOrder = async (req, res) => {
     });
 
     console.log(`📦 Checkout completed. Order #${orderId} created for Buyer ${user.name}`);
+
+    // --- Create Notifications for Buyer and Wholesalers ---
+    try {
+      // Notify Buyer
+      NotificationModel.createNotification({
+        userId: user.id,
+        title: "Order Placed Successfully",
+        message: `Your order #${orderId} for Rs ${total_amount} has been placed.`,
+        type: "order",
+        senderName: user.name,
+        senderRole: "buyer"
+      });
+
+      // Notify Wholesalers
+      const parsedItems = typeof items === 'string' ? JSON.parse(items) : items;
+      const notifiedWholesalers = new Set();
+      for (const item of parsedItems) {
+        const wId = item.wholesaler_id;
+        if (wId && !notifiedWholesalers.has(wId)) {
+          notifiedWholesalers.add(wId);
+          NotificationModel.createNotification({
+            userId: wId,
+            title: "New Incoming Purchase Order",
+            message: `Buyer ${user.name} placed order #${orderId} containing your products.`,
+            type: "order",
+            senderName: user.name,
+            senderRole: "buyer"
+          });
+        }
+      }
+    } catch (notifErr) {
+      console.error("Notification creation error during checkout:", notifErr);
+    }
 
     // --- Basic Stock Management: Decrease Product Quantities ---
     try {
@@ -199,6 +233,24 @@ const updateOrderStatus = async (req, res) => {
   try {
     const updated = await OrderModel.updateOrderStatus(orderId, status);
     if (updated) {
+      // Notify buyer about the status update
+      try {
+        const [orders] = await db.query("SELECT buyer_id, buyer_name FROM orders WHERE id = ?", [orderId]);
+        if (orders && orders[0]) {
+          const user = req.user || {};
+          NotificationModel.createNotification({
+            userId: orders[0].buyer_id,
+            title: `Order #${orderId} ${status.toUpperCase()}`,
+            message: `Your order #${orderId} status has been updated to "${status}".`,
+            type: "order",
+            senderName: user.name || "Wholesaler",
+            senderRole: user.role || "wholesaler"
+          });
+        }
+      } catch (notifErr) {
+        console.error("Notification error on status update:", notifErr);
+      }
+
       return res.status(200).json({ success: true, message: "Order status updated successfully." });
     }
     return res.status(404).json({ success: false, message: "Order not found or no status change." });
