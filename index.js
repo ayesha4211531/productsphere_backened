@@ -29,6 +29,9 @@ app.use("/negotiations", require("./routes/negotiationRoutes"));
 // Mount settings routes
 app.use("/settings", require("./routes/settingsRoutes"));
 
+// Mount notification routes
+app.use("/notifications", require("./routes/notificationRoutes"));
+
 app.listen(port, () => {
 console.log(`🚀 Product Sphere B2B Server running on port ${port}`);
 });

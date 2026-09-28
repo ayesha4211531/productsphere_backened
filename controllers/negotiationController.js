@@ -1,5 +1,7 @@
 const NegotiationModel = require("../models/negotiationModel");
 const UserModel = require("../models/userModel");
+const NotificationModel = require("../models/notificationModel");
+const db = require("../config/db");
 
 const createNegotiation = async (req, res) => {
   const { product_id, product_name, price, quantity, bid_price, message, wholesaler_id } = req.body;
@@ -28,6 +30,19 @@ const createNegotiation = async (req, res) => {
     });
 
     console.log(`🤝 Price negotiation bid #${bidId} submitted by Buyer ${user.name} for product: ${product_name}`);
+
+    // Notify wholesaler
+    try {
+      NotificationModel.createNotification({
+        userId: wholesaler_id,
+        title: `New Price Offer: ${product_name}`,
+        message: `Buyer ${user.name} offered Rs ${bid_price} (Qty: ${quantity}) for "${product_name}".`,
+        type: "bid",
+        senderName: user.name,
+        senderRole: "buyer"
+      });
+    } catch (_) {}
+
     return res.status(201).json({
       success: true,
       message: "Bid submitted successfully.",
@@ -74,6 +89,7 @@ const getWholesalerNegotiations = async (req, res) => {
     return res.status(500).json({ success: false, message: "Server error retrieving bids." });
   }
 };
+
 const updateStatus = async (req, res) => {
   const { id } = req.params;
   const { status, message } = req.body;
@@ -97,6 +113,22 @@ const updateStatus = async (req, res) => {
     );
 
     if (updated) {
+      // Notify buyer about the decision
+      try {
+        const [bids] = await db.query("SELECT buyer_id, product_name, bid_price FROM negotiations WHERE id = ?", [id]);
+        if (bids && bids[0]) {
+          const user = req.user || {};
+          NotificationModel.createNotification({
+            userId: bids[0].buyer_id,
+            title: `Bid ${status.toUpperCase()}: ${bids[0].product_name}`,
+            message: `Your bid of Rs ${bids[0].bid_price} for "${bids[0].product_name}" was ${status}.${message ? ` Note: ${message}` : ''}`,
+            type: "bid",
+            senderName: user.name || "Wholesaler",
+            senderRole: user.role || "wholesaler"
+          });
+        }
+      } catch (_) {}
+
       return res.status(200).json({
         success: true,
         message: `Bid status updated to ${status}.`
